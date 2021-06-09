@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_web_portfolio/about_view.dart';
-import 'package:flutter_web_portfolio/bottom_bar.dart';
-import 'package:flutter_web_portfolio/content_view.dart';
-import 'package:flutter_web_portfolio/custom_tab.dart';
-import 'package:flutter_web_portfolio/custom_tab_bar.dart';
-import 'package:flutter_web_portfolio/home_view.dart';
-import 'package:flutter_web_portfolio/projects_view.dart';
+import 'package:flutter_web_portfolio/utils/tab_controller_handler.dart';
+import 'package:flutter_web_portfolio/utils/view_wrapper.dart';
+import 'package:flutter_web_portfolio/views/about_view.dart';
+import 'package:flutter_web_portfolio/widgets/bottom_bar.dart';
+import 'package:flutter_web_portfolio/views/content_view.dart';
+import 'package:flutter_web_portfolio/widgets/custom_tab.dart';
+import 'package:flutter_web_portfolio/widgets/custom_tab_bar.dart';
+import 'package:flutter_web_portfolio/views/home_view.dart';
+import 'package:flutter_web_portfolio/views/projects_view.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -15,11 +17,13 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   var scaffoldKey = GlobalKey<ScaffoldState>();
-  late double _screenWidth;
-  late double _screenHeight;
-  late double _topPadding;
-  late double _bottomPadding;
-  late TabController _tabController;
+  late double screenWidth;
+  late double screenHeight;
+  late double topPadding;
+  late double bottomPadding;
+  late double sidePadding;
+  late TabController tabController;
+  // late ItemScrollController itemScrollController;
 
   List<ContentView> contentViews = [
     ContentView(tab: CustomTab(title: 'Home'), content: HomeView()),
@@ -30,76 +34,83 @@ class _HomePageState extends State<HomePage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: contentViews.length, vsync: this);
+    tabController = TabController(length: contentViews.length, vsync: this);
+    // itemScrollController = ItemScrollController();
   }
 
   @override
   Widget build(BuildContext context) {
-    _screenWidth = MediaQuery.of(context).size.width;
-    _screenHeight = MediaQuery.of(context).size.height;
-    _topPadding = _screenHeight * 0.05;
-    _bottomPadding = _screenHeight * 0.01;
+    screenWidth = MediaQuery.of(context).size.width;
+    screenHeight = MediaQuery.of(context).size.height;
+    topPadding = screenHeight * 0.05;
+    bottomPadding = screenHeight * 0.03;
+    sidePadding = screenWidth * 0.05;
 
     return Scaffold(
       backgroundColor: Color(0xff1e1e24),
       endDrawer: menuDrawer(),
       key: scaffoldKey,
       body: Padding(
-        padding: EdgeInsets.only(bottom: _bottomPadding, top: _topPadding),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            if (constraints.maxWidth > 715) {
-              return desktopView();
-            } else {
-              return mobileView();
-            }
-          },
-        ),
-      ),
+          padding: EdgeInsets.only(bottom: bottomPadding, top: topPadding),
+          child: ViewWrapper(
+            key: GlobalKey(debugLabel: 'ViewWrapper'),
+            desktopView: desktopView(),
+            mobileView: mobileView(),
+          )),
     );
   }
 
   Widget desktopView() {
-    return Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          CustomTabBar(
-              controller: _tabController,
-              tabs: contentViews.map((e) => e.tab).toList()),
-          Container(
-            height: _screenHeight * 0.8,
-            child: TabBarView(
-              controller: _tabController,
-              children: contentViews.map((e) => e.content).toList(),
-              physics: NeverScrollableScrollPhysics(),
-            ),
-          ),
-          BottomBar(),
-        ]);
-  }
-
-  Widget mobileView() {
-    return Padding(
-      padding: EdgeInsets.only(
-          left: _screenWidth * 0.05, right: _screenWidth * 0.05),
-      child: Container(
-        width: _screenWidth,
-        child: Column(
+    return SingleChildScrollView(
+      padding: EdgeInsets.only(bottom: 10),
+      child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            IconButton(
-                iconSize: _screenWidth * 0.05,
-                onPressed: () => scaffoldKey.currentState!.openEndDrawer(),
-                icon: Icon(Icons.menu_rounded),
-                color: Colors.white),
-            Expanded(
-              child: ListView.builder(
-                  itemCount: contentViews.length,
-                  itemBuilder: (context, index) => contentViews[index].content),
-            )
-          ],
+            CustomTabBar(
+                controller: tabController,
+                tabs: contentViews.map((e) => e.tab).toList()),
+            Container(
+              height: screenHeight * 0.8,
+              child: TabControllerHandler(
+                tabController: tabController,
+                key: GlobalKey(debugLabel: 'desktopView TabControllerHandler'),
+                child: TabBarView(
+                  controller: tabController,
+                  children: contentViews.map((e) => e.content).toList(),
+                  physics: AlwaysScrollableScrollPhysics(),
+                ),
+              ),
+            ),
+            BottomBar(),
+          ]),
+    );
+  }
+
+  Widget mobileView() {
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.only(
+            left: screenWidth * 0.05, right: screenWidth * 0.05),
+        child: Container(
+          width: screenWidth,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              IconButton(
+                  iconSize: screenWidth * 0.05,
+                  onPressed: () => scaffoldKey.currentState!.openEndDrawer(),
+                  icon: Icon(Icons.menu_rounded),
+                  color: Colors.white),
+              Expanded(
+                child: ListView.builder(
+                    itemCount: contentViews.length,
+                    itemBuilder: (context, index) =>
+                        contentViews[index].content),
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -110,7 +121,7 @@ class _HomePageState extends State<HomePage>
       child: ListView(
         children: [
               Container(
-                height: _screenHeight * 0.05,
+                height: screenHeight * 0.05,
               )
             ] +
             contentViews

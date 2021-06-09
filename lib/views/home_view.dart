@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web_portfolio/widgets/navigation_arrow.dart';
 
 class HomeView extends StatefulWidget {
   @override
@@ -19,29 +20,35 @@ class _HomeViewState extends State<HomeView> {
   }
 
   Widget desktopView() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Container(
-          width: _screenWidth * 0.45,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              header(getFontSize(true)),
-              SizedBox(height: _screenHeight * 0.05),
-              subHeader('Software Developer', getFontSize(false)),
-              SizedBox(height: _screenHeight * 0.01),
-              subHeader('Mobile Application Developer', getFontSize(false)),
-              SizedBox(height: _screenHeight * 0.01),
-              subHeader('Flutter Enthusiast', getFontSize(false)),
-              SizedBox(height: _screenHeight * 0.1),
-            ],
-          ),
+    return Stack(
+      children: <Widget>[
+        NavigationArrow(isBackArrow: true),
+        NavigationArrow(isBackArrow: false),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              width: _screenWidth * 0.45,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  header(getFontSize(true)),
+                  SizedBox(height: _screenHeight * 0.05),
+                  subHeader('Software Developer', getFontSize(false)),
+                  SizedBox(height: _screenHeight * 0.01),
+                  subHeader('Mobile Application Developer', getFontSize(false)),
+                  SizedBox(height: _screenHeight * 0.01),
+                  subHeader('Flutter Enthusiast', getFontSize(false)),
+                  SizedBox(height: _screenHeight * 0.1),
+                ],
+              ),
+            ),
+            SizedBox(width: _screenWidth * 0.03),
+            picture()
+          ],
         ),
-        SizedBox(width: _screenWidth * 0.03),
-        picture()
       ],
     );
   }
